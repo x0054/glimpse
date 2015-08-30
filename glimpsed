@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Settings
+
+# Location of the Glimpse Script
+scriptdir=$(cd "$( dirname "$0" )" && pwd)
+glimpse=$scriptdir/glimpse
+
+# Port to Run the Server On
+
+port=5488
+
+nohup socat TCP4-LISTEN:$port,fork EXEC:$glimpse &

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Uptime
+uptime=$(uptime)
+uptime=${uptime%,*user*}
+uptime=${uptime#*up }
+
+# Users
+usercount=$(who | wc -l)
+
+# System Load
+load=$(uptime)
+load=${load#*\: }
+
+#PS Count
+pscount=$(ps -A --no-headers | wc -l)
+
+# Memory Usage
+ramtotal=$(free -m | grep Mem | while read a b c; do echo "$b"; done)
+ramused=$(free -m | grep buffers/cache | while read a b c d; do echo "$c"; done)
+ramfree=$(free -m | grep buffers/cache | while read a b c d e; do echo "$d"; done)
+
+# Disk Space
+diskspace=$(df -h | grep /dev/ | while read a b c d e f; do printf "%-9s%s GB Left\n" "${a#*/dev/}:" "${d%G}"; done)
+
+# Output
+printf "%-9s%s\n" "Uptime:" "$uptime"
+printf "%-9s%s\n" "Users:" "$usercount"
+printf "%-9s%s\n" "Load:" "$load"
+printf "%-9s%s\n" "Procs:" "$pscount"
+printf "%-9s%s MB Free\n" "Memory:" "$ramfree"
+printf "$diskspace\n"
+
+# RX and TX Speeds
+interface="/sys/class/net/eth0"
+
+rx1=$(cat $interface/statistics/rx_bytes)                                      
+tx1=$(cat $interface/statistics/tx_bytes)
+
+sleep 1s
+
+rx2=$(cat $interface/statistics/rx_bytes)                                      
+tx2=$(cat $interface/statistics/tx_bytes)
+
+rx="$((($rx2-$rx1)/1024)) Kb ↓"
+tx="$((($tx2-$tx1)/1024)) Kb ↑"
+
+printf "%-9s%s / %s\n" "Net:" "$tx" "$rx"
